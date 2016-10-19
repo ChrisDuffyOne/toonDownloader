@@ -17,7 +17,7 @@ app.use(express.static('public'));
 
 //DEBUG Socket.io
 var toonDownloadList = []; //DEBUG
-var socket_io = require('socket.io'); //DEBUG
+var socket_io = require('socket.io');
 var server = http.Server(app);
 var io = socket_io(server);
 
@@ -29,9 +29,10 @@ app.get('/listShow', function(req, res){
   request('http://www.toon.is', function(error, response, body){
     if(!error && response.statusCode == 200){
       var $ = cheerio.load(body);
-      $('li a', '#ul_categories').each(function(){
+      $('li a', '.hasdropdown #ul_categories').each(function(){
         urls.push({name: $(this).html(), url: $(this).attr('href')});
       });
+      
       res.status(200).json(urls);
     }
   });
@@ -85,7 +86,7 @@ app.post('/getMp4Url', function(req, res){
   });
 });
 
-//DEBUG
+//Socket.io Downloader
 io.on('connection', function(socket){
   
   //Send client their socket id
@@ -117,10 +118,19 @@ io.on('connection', function(socket){
     }
     
     //Start Video Download:
-    request(videoToDownload).pipe(res); //DEBUG
-    //request('http://i3.ytimg.com/vi/J---aiyznGQ/mqdefault.jpg').pipe(res); //DEBUG
+    //request(videoToDownload).pipe(res); //THIS WORKS!
     
-    //DEBUG issue request for next video
+    //DEBUG Start Video Download Error check:
+    request
+      .get(videoToDownload)
+      .on('error' ,function(err){
+        console.log('VideoRequest: ',videoToDownload);
+        console.log('VideoRequestError: ',err);
+      })
+      .pipe(res);
+    
+    
+    //issue request for next video
     req.on("close", function() { 
       console.log('Connection: Closed Unexpectly');
       io.to(req.params.socketRef).emit('requestRetry', 'Retry Download');
@@ -133,39 +143,8 @@ io.on('connection', function(socket){
   
 });
 
-//Route: Send Video Download to client
-/*app.get('/downloadEpisode/:socketRef/:videoRef', function(req, res){
-  
-  var videoToDownload;
-  req.params.socketRef = "/#" + req.params.socketRef;
-  
-  
-  for(var i=0; i<toonDownloadList.length; i++){
-    if(toonDownloadList[i].clientId === req.params.socketRef){
-      
-      for(var k=0; k<toonDownloadList[i].clientList.length; k++){
-        if(toonDownloadList[i].clientList[k].fileID === req.params.videoRef){
-          videoToDownload = (toonDownloadList[i].clientList[k].fileUrl).replace(/\\/g, '');
-          console.log('Found Video ID');
-        }
-      }
-    }
-  }
-  
-  //Start Video Download:
-  request(videoToDownload).pipe(res);
-  
-  //DEBUG issue request for next video
-  req.on("close", function() { 
-    console.log('Connection: Closed Unexpectly'); 
-  });
-  req.on("end", function() { 
-    console.log('Connection: Ended Normally'); 
-    
-  });
-});*/
-
-
+//Mocha Test Exports
+exports.app = app;
 
 server.listen(process.env.PORT || 8080); 
 console.log('ToonIs Downloader: Online');
