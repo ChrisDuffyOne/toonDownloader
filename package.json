@@ -1,0 +1,26 @@
+{
+  "name": "toondownload",
+  "version": "1.0.0",
+  "description": "A test screen scraper/file streamer for toon.is",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js"
+  },
+  "keywords": [
+    "toon",
+    "Toon",
+    "is",
+    "toon.is",
+    "downloader"
+  ],
+  "author": "Christopher Duffy",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cheerio": "^0.22.0",
+    "express": "^4.14.0",
+    "mime": "^1.3.4",
+    "request": "^2.75.0",
+    "socket.io": "^1.4.8"
+  }
+}

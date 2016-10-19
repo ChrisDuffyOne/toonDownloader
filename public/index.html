@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TOON IS DOWNLOADER</title>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="col-xs-4">Toon.is Downloader</h1>
+            <!--<button type="button" id="downloadEpisodeButton" class="col-xs-4 selectedEpisode">DOWNLOAD</button>
+            <a href="/downloadEpisode" id="dlTest" download="proposed_file_name">Download Cat</a>--> <!--WORKS-->
+            <button type="button" id="downloadBatch" class="tvShowButton selectedEpisode">DOWNLOAD ALL</button>
+        </div>
+        
+        <div class="container">
+            <ul class="col-xs-4" id="videoList">
+            </ul>
+            
+            <ul class="col-xs-4" id="episodeList"> <!--col-xs-8-->
+            </ul>
+            
+            <!--DEBUG-->
+            <ul class="col-xs-4" id="downloadBatchHidden">
+                 <!--<li><a href="/downloadEpisode/TEST/" download="TEST">TEST</a></li>-->
+                 <!--<li><a href="/downloadEpisode/CHSMMil58w_mn45lAAAT/" download="TEST">TEST</a></li> <!--removed#-->
+            </ul>
+        </div>
+        
+        <!-- Scripts -->
+        <script src="/socket.io/socket.io.js"></script> <!--DEBUG-->
+        <script src="js/jquery-2.1.0.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html> 
