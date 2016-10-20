@@ -2,3 +2,6 @@
     background-color: #3292D0;
     color: white;
 }
+#downloadBatchHidden{
+    display: none;
+}

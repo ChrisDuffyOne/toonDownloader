@@ -42,18 +42,45 @@ app.get('/listShow', function(req, res){
 app.post('/listEpisode', function(req, res){
   var urls = [];
   
-  request(req.body.urlData, function(error, response, body){
-    if(!error && response.statusCode == 200){
-      var $ = cheerio.load(body);
-      $('li a', '.videolist').each(function(){
+  //DEBUG getEpisodes
+  function getEpisodes(urlData){
+    
+    request(urlData, function(error, response, body){
+      if(!error && response.statusCode == 200){
+        var numCapturedEpisodes = 0;
+        var $ = cheerio.load(body);
+        $('li a', '.videolist').each(function(){
+          var episodeName = this.children[3].children[0].data;
+          var episodeLink = this.attribs.href;
+          urls.push({name: episodeName, url: episodeLink});
+          numCapturedEpisodes++;
+        });
+        console.log('NumCapturedEpisodes: ', numCapturedEpisodes); //DEBUG
+        console.log('GetVideoListURL: ',req.body.urlData); //DEBUG
         
-        var episodeName = this.children[3].children[0].data;
-        var episodeLink = this.attribs.href;
-        urls.push({name: episodeName, url: episodeLink});
-      });
-      res.status(200).json(urls);
-    }
-  });
+        //load the next page Else send all episodes back to client
+        if(numCapturedEpisodes > 0){
+          
+          //Extract page number
+          var pageStart = urlData.search('videos-') + 7;
+          var pageEnd = urlData.search('-date');
+          var pageLength = pageEnd - pageStart;
+          
+          //Increment page number
+          var currentPage = Number(urlData.substr(pageStart, pageLength));
+          var nextPage = currentPage + 1;
+          
+          //Generate next page
+          var nextPageUrl = urlData.replace(RegExp(currentPage, "g"), nextPage);
+          getEpisodes(nextPageUrl);
+        }else{
+          res.status(200).json(urls);
+        }
+      }
+    });
+  }
+  getEpisodes(req.body.urlData);
+  
   
 });
 
@@ -117,18 +144,19 @@ io.on('connection', function(socket){
       }
     }
     
-    //Start Video Download:
-    //request(videoToDownload).pipe(res); //THIS WORKS!
-    
     //DEBUG Start Video Download Error check:
     request
       .get(videoToDownload)
-      .on('error' ,function(err){
+      /*.on('error' ,function(err){
         console.log('VideoRequest: ',videoToDownload);
         console.log('VideoRequestError: ',err);
+      })*/
+      .on('response' ,function(response){
+        console.log('VideoRequest: ',videoToDownload);
+        console.log('VideoResCode: ',response.statusCode);
+        console.log('VideoResType: ',response.headers['content-type']);
       })
       .pipe(res);
-    
     
     //issue request for next video
     req.on("close", function() { 
