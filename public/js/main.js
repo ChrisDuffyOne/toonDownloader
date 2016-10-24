@@ -3,7 +3,7 @@ var socket = io();
 var socketDownloadId; 
 
 var VideoList = function() {
-    this.downloadIndex = 0; //DEBUG
+    this.downloadIndex = 0;
     this.videos = [];
     this.episodes = [];
     this.downloadList = [];

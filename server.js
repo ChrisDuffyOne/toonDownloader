@@ -42,7 +42,7 @@ app.get('/listShow', function(req, res){
 app.post('/listEpisode', function(req, res){
   var urls = [];
   
-  //DEBUG getEpisodes
+  //getEpisodes
   function getEpisodes(urlData){
     
     request(urlData, function(error, response, body){
@@ -50,13 +50,12 @@ app.post('/listEpisode', function(req, res){
         var numCapturedEpisodes = 0;
         var $ = cheerio.load(body);
         $('li a', '.videolist').each(function(){
+          
           var episodeName = this.children[3].children[0].data;
           var episodeLink = this.attribs.href;
           urls.push({name: episodeName, url: episodeLink});
           numCapturedEpisodes++;
         });
-        console.log('NumCapturedEpisodes: ', numCapturedEpisodes); //DEBUG
-        console.log('GetVideoListURL: ',req.body.urlData); //DEBUG
         
         //load the next page Else send all episodes back to client
         if(numCapturedEpisodes > 0){
@@ -70,8 +69,13 @@ app.post('/listEpisode', function(req, res){
           var currentPage = Number(urlData.substr(pageStart, pageLength));
           var nextPage = currentPage + 1;
           
+          //concat page string
+          var videoConcat = 'videos-';
+          var currentPageString = videoConcat.concat(currentPage);
+          var nextPageString = videoConcat.concat(nextPage);
+          
           //Generate next page
-          var nextPageUrl = urlData.replace(RegExp(currentPage, "g"), nextPage);
+          var nextPageUrl = urlData.replace(RegExp(currentPageString, "g"), nextPageString);
           getEpisodes(nextPageUrl);
         }else{
           res.status(200).json(urls);
@@ -147,10 +151,6 @@ io.on('connection', function(socket){
     //DEBUG Start Video Download Error check:
     request
       .get(videoToDownload)
-      /*.on('error' ,function(err){
-        console.log('VideoRequest: ',videoToDownload);
-        console.log('VideoRequestError: ',err);
-      })*/
       .on('response' ,function(response){
         console.log('VideoRequest: ',videoToDownload);
         console.log('VideoResCode: ',response.statusCode);
@@ -159,10 +159,10 @@ io.on('connection', function(socket){
       .pipe(res);
     
     //issue request for next video
-    req.on("close", function() { 
+    /*req.on("close", function() { 
       console.log('Connection: Closed Unexpectly');
       io.to(req.params.socketRef).emit('requestRetry', 'Retry Download');
-    });
+    });*/
     req.on("end", function() { 
       console.log('Connection: Ended Normally'); 
       io.to(req.params.socketRef).emit('requestNext', 'Next Download');
