@@ -112,6 +112,7 @@ app.post('/getMp4Url', function(req, res){
       var urlExtractEscaped = urlExtract.replace(/\\/g, '');
        
        var returnURLinfo = {filePath: urlExtractEscaped, refHTML: req.body.getUrl};
+       console.log('Returned URL: 'returnURLinfo); //HEROKU
        res.status(200).json(returnURLinfo);
     }
   });
@@ -189,7 +190,7 @@ io.on('connection', function(socket){
       })
       .pipe(res);*/
       
-      console.log("videoToDownload_confirm: ", videoToDownload);
+      console.log("videoToDownload_confirm: ", videoToDownload); //HEROKU
       
     
     req.on("end", function(){
