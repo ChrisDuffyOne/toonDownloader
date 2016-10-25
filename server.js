@@ -136,11 +136,9 @@ io.on('connection', function(socket){
     var videoToDownload;
     req.params.socketRef = "/#" + req.params.socketRef;
     
-    console.log('toonDownloadList.length: ',toonDownloadList.length); //HEROKU
-    
     for(var i=0; i<toonDownloadList.length; i++){
+      console.log('toonDownloadList[i].clientId: ', toonDownloadList[i].clientId); //HEROKU
       if(toonDownloadList[i].clientId === req.params.socketRef){
-        
         for(var k=0; k<toonDownloadList[i].clientList.length; k++){
           if(toonDownloadList[i].clientList[k].fileID === req.params.videoRef){
             videoToDownload = (toonDownloadList[i].clientList[k].fileUrl).replace(/\\/g, '');
