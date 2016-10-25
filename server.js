@@ -149,9 +149,10 @@ io.on('connection', function(socket){
     }
     
     //Start Video Download Error check:
-    var retryDownload; //DEBUG
+    var retryDownload;
     
-    request
+    //NOT WORKING WITH HEROKU
+    /*request
       .get(videoToDownload)
       .on('response' ,function(response){
         console.log('VideoRequest: ',videoToDownload);
@@ -165,7 +166,28 @@ io.on('connection', function(socket){
           retryDownload = false;
         }
       })
+      .pipe(res);*/
+    
+    //DEBUG HEROKU FIX
+    var options = {
+      method: 'GET',
+      url: videoToDownload
+    };
+    request(options)
+      .on('response' ,function(response){
+        console.log('HEROKU:VideoRequest: ',videoToDownload);
+        console.log('HEROKU:VideoResCode: ',response.statusCode);
+        console.log('HEROKU:VideoResType: ',response.headers['content-type']);
+        
+        //DEBUG issue video retry request NOT TESTED!
+        if(response.statusCode === 520 || response.statusCode === 522){
+          retryDownload = true;
+        }else{
+          retryDownload = false;
+        }
+      })
       .pipe(res);
+      
     
     req.on("end", function(){
       if(retryDownload === false){
