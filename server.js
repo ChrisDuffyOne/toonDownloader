@@ -112,7 +112,7 @@ app.post('/getMp4Url', function(req, res){
       var urlExtractEscaped = urlExtract.replace(/\\/g, '');
        
        var returnURLinfo = {filePath: urlExtractEscaped, refHTML: req.body.getUrl};
-       console.log('Returned URL: ',returnURLinfo); //HEROKU
+       //console.log('Returned URL: ',returnURLinfo); //HEROKU OKAY
        res.status(200).json(returnURLinfo);
     }
   });
@@ -144,6 +144,8 @@ io.on('connection', function(socket){
           if(toonDownloadList[i].clientList[k].fileID === req.params.videoRef){
             videoToDownload = (toonDownloadList[i].clientList[k].fileUrl).replace(/\\/g, '');
             console.log('Found Video ID');
+          }else{
+            console.log('Not Found Video ID'); //HEROKU
           }
         }
       }
