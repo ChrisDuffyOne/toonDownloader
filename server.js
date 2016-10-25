@@ -173,7 +173,7 @@ io.on('connection', function(socket){
       method: 'GET',
       uri: videoToDownload
     };
-    request(options)
+    request(options.uri)
       .on('response' ,function(response){
         console.log('HEROKU:VideoRequest: ',videoToDownload);
         console.log('HEROKU:VideoResCode: ',response.statusCode);
