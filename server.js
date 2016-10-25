@@ -137,8 +137,12 @@ io.on('connection', function(socket){
     req.params.socketRef = "/#" + req.params.socketRef;
     
     for(var i=0; i<toonDownloadList.length; i++){
-      console.log('toonDownloadList[i].clientId: ', toonDownloadList[i].clientId); //HEROKU
+      //console.log('toonDownloadList[i].clientId: ', toonDownloadList[i].clientId); //HEROKU WORKS ids are showing up
       if(toonDownloadList[i].clientId === req.params.socketRef){
+        
+        console.log('ID Param: ', req.params.socketRef);          //HEROKU 
+        console.log('ID Client: ', toonDownloadList[i].clientId); //HEROKU
+        
         for(var k=0; k<toonDownloadList[i].clientList.length; k++){
           if(toonDownloadList[i].clientList[k].fileID === req.params.videoRef){
             videoToDownload = (toonDownloadList[i].clientList[k].fileUrl).replace(/\\/g, '');
