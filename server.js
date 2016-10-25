@@ -169,15 +169,16 @@ io.on('connection', function(socket){
       .pipe(res);*/
     
     //DEBUG HEROKU FIX
+    var videoToDownloadStr = videoToDownload.toString();
     var options = {
       method: 'GET',
-      uri: videoToDownload
+      uri: videoToDownloadStr
     };
-    request(options.uri)
+    request(options)
       .on('response' ,function(response){
-        console.log('HEROKU:VideoRequest: ',videoToDownload);
-        console.log('HEROKU:VideoResCode: ',response.statusCode);
-        console.log('HEROKU:VideoResType: ',response.headers['content-type']);
+        console.log('TOSTRING:VideoRequest: ',videoToDownload);
+        console.log('VideoResCode: ',response.statusCode);
+        console.log('VideoResType: ',response.headers['content-type']);
         
         //DEBUG issue video retry request NOT TESTED!
         if(response.statusCode === 520 || response.statusCode === 522){
