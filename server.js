@@ -171,7 +171,7 @@ io.on('connection', function(socket){
     //DEBUG HEROKU FIX
     var options = {
       method: 'GET',
-      url: videoToDownload
+      uri: videoToDownload
     };
     request(options)
       .on('response' ,function(response){
