@@ -169,7 +169,7 @@ io.on('connection', function(socket){
       .pipe(res);*/
     
     //DEBUG HEROKU FIX
-    var videoToDownloadStr = videoToDownload.toString();
+    /*var videoToDownloadStr = videoToDownload.toString();
     var options = {
       method: 'GET',
       uri: videoToDownloadStr
@@ -187,7 +187,9 @@ io.on('connection', function(socket){
           retryDownload = false;
         }
       })
-      .pipe(res);
+      .pipe(res);*/
+      
+      console.log("videoToDownload_confirm: ", videoToDownload);
       
     
     req.on("end", function(){
