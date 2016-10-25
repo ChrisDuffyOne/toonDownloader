@@ -148,25 +148,39 @@ io.on('connection', function(socket){
       }
     }
     
-    //DEBUG Start Video Download Error check:
+    //Start Video Download Error check:
+    var retryDownload; //DEBUG
+    
     request
       .get(videoToDownload)
       .on('response' ,function(response){
         console.log('VideoRequest: ',videoToDownload);
         console.log('VideoResCode: ',response.statusCode);
         console.log('VideoResType: ',response.headers['content-type']);
+        
+        //DEBUG issue video retry request NOT TESTED!
+        if(response.statusCode === 520 || response.statusCode === 522){
+          retryDownload = true;
+        }else{
+          retryDownload = false;
+        }
       })
       .pipe(res);
     
-    //issue request for next video
-    /*req.on("close", function() { 
-      console.log('Connection: Closed Unexpectly');
-      io.to(req.params.socketRef).emit('requestRetry', 'Retry Download');
-    });*/
-    req.on("end", function() { 
-      console.log('Connection: Ended Normally'); 
-      io.to(req.params.socketRef).emit('requestNext', 'Next Download');
+    req.on("end", function(){
+      if(retryDownload === false){
+        console.log('VideoReqEnd: Ended Normally'); 
+        io.to(req.params.socketRef).emit('requestNext', 'Next Download');
+        console.log('-----------------------------------------------');
+      }else if(retryDownload === true){
+        setTimeout(function(){
+          console.log('VideoReqEnd: Returned 520 or 522');
+          io.to(req.params.socketRef).emit('requestRetry', 'Retry Download');
+        }, 5000);
+        console.log('-----------------------------------------------');
+      }
     });
+    
   });
   
 });

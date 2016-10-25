@@ -35,6 +35,8 @@ VideoList.prototype.getVideoListDone = function(videos) {
     $('#videoList li button').click(function(){
         var urlData = $(this).attr('data');
         videoList.getEpisodeList(urlData);
+        //window.scrollTo(0, 0); //DEBUG Scrool to page top
+        $("html, body").animate({ scrollTop: "0px"}); //DEBUG
     });
 };
 
@@ -74,7 +76,8 @@ VideoList.prototype.getEpisodeListDone = function(episodes){
         
         //check if episode is a duplicate
         if(videoList.rmDupEpisode(urlName)){ console.log('DUPLICATE ENTRY!: REMOVED');}
-        else{ videoList.downloadList.push({name: urlName, url: urlData, fileUrl: undefined, fileID: episodeID});}
+        //else{ videoList.downloadList.push({name: urlName, url: urlData, fileUrl: undefined, fileID: episodeID});}
+        else{ videoList.downloadList.push({name: urlName, url: urlData, fileUrl: undefined, fileID: episodeID, retryNum: 0});} //DEBUG retry feature
         
         //fire off ajax request for mp4 url
         $(this).toggleClass("selectedEpisode");
@@ -130,17 +133,26 @@ VideoList.prototype.socketEvents = function(){
             }else{
                 var testAutoClick = "#" + videoList.downloadList[videoList.downloadIndex].fileID;
                 $(testAutoClick).get(0).click();
-                console.log('NEXT DOWNLOAD CALL!');
             }
     });
-    //DEBUG: Untested
     socket.on('requestRetry', function(){
-            if(videoList.downloadIndex === videoList.downloadList.length){
-                console.log('All Files Downloaded');
-            }else{
+            
+            //Retry request two additional else
+            videoList.downloadList[videoList.downloadIndex].retryNum++;
+            if(videoList.downloadList[videoList.downloadIndex].retryNum < 3){
+                console.log('Retry Number:', videoList.downloadList[videoList.downloadIndex].retryNum);
                 var testAutoClick = "#" + videoList.downloadList[videoList.downloadIndex].fileID;
                 $(testAutoClick).get(0).click();
-                console.log('NEXT DOWNLOAD CALL!');
+            }
+            //Move onto next video
+            else{
+                videoList.downloadIndex++;
+                if(videoList.downloadIndex === videoList.downloadList.length){
+                    console.log('All Files Downloaded');
+                }else{
+                    var testAutoClick = "#" + videoList.downloadList[videoList.downloadIndex].fileID;
+                    $(testAutoClick).get(0).click();
+                }
             }
     });
     
@@ -196,14 +208,4 @@ function toonDownloader(){
 
 $(document).ready(function(){
     toonDownloader();
-    
-
-    //AUTO DOWNLOAD THE LIST OF VIDEOS YOU WANT//
-    
-    //$('#dlTest').get(0).click(); //Automatically download Spoof click Works!
-    
-    /*for(var i=0; i<2; i++){
-        $('#dlTest').get(0).click();
-    }*/ //Also works for multiple downloads
 });
-
