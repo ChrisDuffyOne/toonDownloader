@@ -112,7 +112,7 @@ app.post('/getMp4Url', function(req, res){
       var urlExtractEscaped = urlExtract.replace(/\\/g, '');
        
        var returnURLinfo = {filePath: urlExtractEscaped, refHTML: req.body.getUrl};
-       console.log('Returned URL: 'returnURLinfo); //HEROKU
+       console.log('Returned URL: ',returnURLinfo); //HEROKU
        res.status(200).json(returnURLinfo);
     }
   });
