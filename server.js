@@ -136,6 +136,7 @@ io.on('connection', function(socket){
     var videoToDownload;
     req.params.socketRef = "/#" + req.params.socketRef;
     
+    console.log('toonDownloadList.length: ',toonDownloadList.length); //HEROKU
     
     for(var i=0; i<toonDownloadList.length; i++){
       if(toonDownloadList[i].clientId === req.params.socketRef){
@@ -145,7 +146,7 @@ io.on('connection', function(socket){
             videoToDownload = (toonDownloadList[i].clientList[k].fileUrl).replace(/\\/g, '');
             console.log('Found Video ID');
           }else{
-            console.log('Not Found Video ID'); //HEROKU
+            //console.log('Not Found Video ID'); //HEROKU NOTHING
           }
         }
       }
