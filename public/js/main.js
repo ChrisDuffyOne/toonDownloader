@@ -35,8 +35,7 @@ VideoList.prototype.getVideoListDone = function(videos) {
     $('#videoList li button').click(function(){
         var urlData = $(this).attr('data');
         videoList.getEpisodeList(urlData);
-        //window.scrollTo(0, 0); //DEBUG Scrool to page top
-        $("html, body").animate({ scrollTop: "0px"}); //DEBUG
+        $("html, body").animate({ scrollTop: "0px"});
     });
 };
 
@@ -57,7 +56,6 @@ VideoList.prototype.getEpisodeListDone = function(episodes){
     this.episodes = [];
      $('#episodeList').empty();
     
-
     this.episodes = episodes;
     episodes.reverse();
     
@@ -76,8 +74,7 @@ VideoList.prototype.getEpisodeListDone = function(episodes){
         
         //check if episode is a duplicate
         if(videoList.rmDupEpisode(urlName)){ console.log('DUPLICATE ENTRY!: REMOVED');}
-        //else{ videoList.downloadList.push({name: urlName, url: urlData, fileUrl: undefined, fileID: episodeID});}
-        else{ videoList.downloadList.push({name: urlName, url: urlData, fileUrl: undefined, fileID: episodeID, retryNum: 0});} //DEBUG retry feature
+        else{ videoList.downloadList.push({name: urlName, url: urlData, fileUrl: undefined, fileID: episodeID, retryNum: 0});}
         
         //fire off ajax request for mp4 url
         $(this).toggleClass("selectedEpisode");
@@ -118,7 +115,7 @@ VideoList.prototype.rmDupEpisode = function(episodeName){
 };
 
 
-//-----------DEBUG Socket.io events-----------//
+//-----------Socket.io events-----------//
 VideoList.prototype.socketEvents = function(){
     var videoList = this;
     

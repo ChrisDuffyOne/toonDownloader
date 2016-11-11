@@ -15,8 +15,8 @@ var cheerio = require('cheerio');
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-//DEBUG Socket.io
-var toonDownloadList = []; //DEBUG
+//Socket.io
+var toonDownloadList = [];
 var socket_io = require('socket.io');
 var server = http.Server(app);
 var io = socket_io(server);
@@ -44,36 +44,34 @@ app.post('/listEpisode', function(req, res){
   
   //getEpisodes
   function getEpisodes(urlData){
-    
     request(urlData, function(error, response, body){
       if(!error && response.statusCode == 200){
         var numCapturedEpisodes = 0;
         var $ = cheerio.load(body);
         $('li a', '.videolist').each(function(){
-          
           var episodeName = this.children[3].children[0].data;
           var episodeLink = this.attribs.href;
           urls.push({name: episodeName, url: episodeLink});
           numCapturedEpisodes++;
         });
-        
+          
         //load the next page Else send all episodes back to client
         if(numCapturedEpisodes > 0){
-          
+            
           //Extract page number
           var pageStart = urlData.search('videos-') + 7;
           var pageEnd = urlData.search('-date');
           var pageLength = pageEnd - pageStart;
-          
+            
           //Increment page number
           var currentPage = Number(urlData.substr(pageStart, pageLength));
           var nextPage = currentPage + 1;
-          
+            
           //concat page string
           var videoConcat = 'videos-';
           var currentPageString = videoConcat.concat(currentPage);
           var nextPageString = videoConcat.concat(nextPage);
-          
+            
           //Generate next page
           var nextPageUrl = urlData.replace(RegExp(currentPageString, "g"), nextPageString);
           getEpisodes(nextPageUrl);
@@ -84,8 +82,6 @@ app.post('/listEpisode', function(req, res){
     });
   }
   getEpisodes(req.body.urlData);
-  
-  
 });
 
 //Route: Get Video File Url
@@ -112,7 +108,7 @@ app.post('/getMp4Url', function(req, res){
       var urlExtractEscaped = urlExtract.replace(/\\/g, '');
        
        var returnURLinfo = {filePath: urlExtractEscaped, refHTML: req.body.getUrl};
-       //console.log('Returned URL: ',returnURLinfo); //HEROKU OKAY
+
        res.status(200).json(returnURLinfo);
     }
   });
@@ -123,6 +119,7 @@ io.on('connection', function(socket){
   
   //Send client their socket id
   var downloadId = socket.id;
+  console.log('downloadID:', downloadId); //DEBUG HEROKU
   io.to(downloadId).emit('clientID', downloadId);
   
   socket.on('downloadBatch', function(downloadList) {
@@ -159,7 +156,7 @@ io.on('connection', function(socket){
     var retryDownload;
     
     //NOT WORKING WITH HEROKU
-    /*request
+    request
       .get(videoToDownload)
       .on('response' ,function(response){
         console.log('VideoRequest: ',videoToDownload);
@@ -173,7 +170,7 @@ io.on('connection', function(socket){
           retryDownload = false;
         }
       })
-      .pipe(res);*/
+      .pipe(res);
     
     //DEBUG HEROKU FIX
     /*var videoToDownloadStr = videoToDownload.toString();
@@ -208,8 +205,8 @@ io.on('connection', function(socket){
         setTimeout(function(){
           console.log('VideoReqEnd: Returned 520 or 522');
           io.to(req.params.socketRef).emit('requestRetry', 'Retry Download');
+           console.log('-----------------------------------------------');
         }, 5000);
-        console.log('-----------------------------------------------');
       }
     });
     
