@@ -120,6 +120,7 @@ io.on('connection', function(socket){
   //Send client their socket id
   var downloadId = socket.id;
   console.log('downloadID:', downloadId); //DEBUG HEROKU
+  console.log('socketID:', socket.id); //DEBUG HEROKU
   io.to(downloadId).emit('clientID', downloadId);
   
   socket.on('downloadBatch', function(downloadList) {
@@ -218,4 +219,4 @@ io.on('connection', function(socket){
 exports.app = app;
 
 server.listen(process.env.PORT || 8080); 
-console.log('ToonIs Downloader: Online');
+console.log('ToonIs Downloader: Online: Revision: HerokuVerify_1');
