@@ -188,10 +188,25 @@ io.on('connection', function(socket){
           retryDownload = false;
         }
       })
+      //DEBUG
+      .on('end', function(response){
+        console.log('THE REQUEST HAS ENDED');
+        if(retryDownload === false){
+          console.log('VideoReqEnd: Ended Normally');
+          io.to(socketIDcallback).emit('requestNext', 'Next Download');
+          console.log('-----------------------------------------------');
+        }else if(retryDownload === true){
+          setTimeout(function(){
+            console.log('VideoReqEnd: Returned 520 or 522');
+            io.to(socketIDcallback).emit('requestRetry', 'Retry Download');
+            console.log('-----------------------------------------------');
+          }, 5000);
+        }
+      })
       .pipe(res);
     
     //Request Next/Retry Video  
-    req.on("end", function(){
+    /*req.on("end", function(){
       if(retryDownload === false){
         console.log('VideoReqEnd: Ended Normally');
         console.log('Next Video on this ID:,', socketIDcallback);
@@ -204,7 +219,7 @@ io.on('connection', function(socket){
           console.log('-----------------------------------------------');
         }, 5000);
       }
-    });
+    });*/
     
   });
 
