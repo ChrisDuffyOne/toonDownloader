@@ -119,8 +119,6 @@ io.on('connection', function(socket){
   
   //Send client their socket id
   var downloadId = socket.id;
-  console.log('downloadID:', downloadId); //DEBUG HEROKU
-  console.log('socketID:', socket.id); //DEBUG HEROKU
   io.to(downloadId).emit('clientID', downloadId);
   
   socket.on('downloadBatch', function(downloadList) {
@@ -133,48 +131,28 @@ io.on('connection', function(socket){
   
     var videoToDownload;
     req.params.socketRef = "/#" + req.params.socketRef;
-    console.log('req.params.socketRef: ',req.params.socketRef); //HEROKU
+    //console.log('req.params.socketRef: ',req.params.socketRef); //HEROKU
     
     for(var i=0; i<toonDownloadList.length; i++){
-      console.log('toonDownloadList[i].clientId: ', toonDownloadList[i].clientId); //HEROKU WORKS ids are showing up
+      //console.log('toonDownloadList[i].clientId: ', toonDownloadList[i].clientId); //HEROKU WORKS ids are showing up
+      
       if(toonDownloadList[i].clientId === req.params.socketRef){
-        
-        //console.log('ID Param: ', req.params.socketRef);          //HEROKU //TODO UNABLE TO PLACE!
-        //console.log('ID Client: ', toonDownloadList[i].clientId); //HEROKU
-        
         for(var k=0; k<toonDownloadList[i].clientList.length; k++){
           if(toonDownloadList[i].clientList[k].fileID === req.params.videoRef){
             videoToDownload = (toonDownloadList[i].clientList[k].fileUrl).replace(/\\/g, '');
             console.log('Found Video ID');
           }else{
-            //console.log('Not Found Video ID'); //HEROKU NOTHING
+            console.log('Not Found Video ID');
           }
         }
       }
     }
     
-    //Start Video Download Error check:
+    
+    //Stream Video to User
+    var videoToDownloadStr = videoToDownload.toString();
     var retryDownload;
     
-    //NOT WORKING WITH HEROKU
-    request
-      .get(videoToDownload)
-      .on('response' ,function(response){
-        console.log('VideoRequest: ',videoToDownload);
-        console.log('VideoResCode: ',response.statusCode);
-        console.log('VideoResType: ',response.headers['content-type']);
-        
-        //DEBUG issue video retry request NOT TESTED!
-        if(response.statusCode === 520 || response.statusCode === 522){
-          retryDownload = true;
-        }else{
-          retryDownload = false;
-        }
-      })
-      .pipe(res);
-    
-    //DEBUG HEROKU FIX
-    /*var videoToDownloadStr = videoToDownload.toString();
     var options = {
       method: 'GET',
       uri: videoToDownloadStr
@@ -185,18 +163,16 @@ io.on('connection', function(socket){
         console.log('VideoResCode: ',response.statusCode);
         console.log('VideoResType: ',response.headers['content-type']);
         
-        //DEBUG issue video retry request NOT TESTED!
+        //Video Retry
         if(response.statusCode === 520 || response.statusCode === 522){
           retryDownload = true;
         }else{
           retryDownload = false;
         }
       })
-      .pipe(res);*/
-      
-      console.log("videoToDownload_confirm: ", videoToDownload); //HEROKU
-      
-    
+      .pipe(res);
+     
+    //Request Next/Retry Video  
     req.on("end", function(){
       if(retryDownload === false){
         console.log('VideoReqEnd: Ended Normally'); 
@@ -206,7 +182,7 @@ io.on('connection', function(socket){
         setTimeout(function(){
           console.log('VideoReqEnd: Returned 520 or 522');
           io.to(req.params.socketRef).emit('requestRetry', 'Retry Download');
-           console.log('-----------------------------------------------');
+          console.log('-----------------------------------------------');
         }, 5000);
       }
     });

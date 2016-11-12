@@ -172,7 +172,7 @@ VideoList.prototype.socketEvents = function(){
         $('#downloadBatchHidden').append(downloadBatchList.join(''));
         socket.emit('downloadBatch', videoList.downloadList);
         
-        //DEBUG Start auto download
+        // Start auto download
         socket.on('downloadReady', function(message){
             var testAutoClick = "#" + videoList.downloadList[videoList.downloadIndex].fileID;
             $(testAutoClick).get(0).click();
