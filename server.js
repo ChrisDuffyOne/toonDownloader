@@ -200,11 +200,18 @@ io.on('connection', function(socket){
     //Request Next/Retry Video  
     req.on("end", function(){
       if(retryDownload === false){
-        console.log('VideoReqEnd: Ended Normally');
+        /*console.log('VideoReqEnd: Ended Normally');
         console.log('Next Video on this ID:,', socketIDcallback); //DEBUG
         //io.to(socket.id).emit('requestNext', 'Next Download'); //FIX THIS socketIDcallback
         io.to(socketIDcallback).emit('requestNext', 'Next Download');
-        console.log('-----------------------------------------------');
+        console.log('-----------------------------------------------');*/
+        /*Attempt Delay between Downloads*/
+        setTimeout(function(){
+          console.log('VideoReqEnd: Ended Normally');
+          console.log('Next Video on this ID:,', socketIDcallback); //DEBUG
+          io.to(socketIDcallback).emit('requestNext', 'Next Download');
+          console.log('-----------------------------------------------');
+        }, 300000);
       }else if(retryDownload === true){
         setTimeout(function(){
           console.log('VideoReqEnd: Returned 520 or 522');
