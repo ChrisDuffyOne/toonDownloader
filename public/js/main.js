@@ -122,6 +122,7 @@ VideoList.prototype.socketEvents = function(){
     //Incoming Events
     socket.on('clientID', function(clientId){
             socketDownloadId = clientId;
+            console.log('socketDownloadId:',socketDownloadId); //DEBUG
     });
     socket.on('requestNext', function(){
             videoList.downloadIndex++;
@@ -165,12 +166,15 @@ VideoList.prototype.socketEvents = function(){
             var fileID = videoList.downloadList[i].fileID;
             var fileName = videoList.downloadList[i].name;
             //Remove first two chars
-            var urlSocketID = socketDownloadId.slice(2, (socketDownloadId.length));
+            //var urlSocketID = socketDownloadId.slice(2, (socketDownloadId.length)); //OLD
+            var urlSocketID = socketDownloadId;
             
             downloadBatchList.push('<li><a href="/downloadEpisode/'+urlSocketID+'/'+fileID+'/" id="'+fileID+'" download="'+fileName+'">Download'+i+'</a></li>'); //DEBUG
         }
         $('#downloadBatchHidden').append(downloadBatchList.join(''));
-        socket.emit('downloadBatch', videoList.downloadList);
+        //socket.emit('downloadBatch', videoList.downloadList); //OLD
+        var downloadBatchInfo = {client: socketDownloadId, list: videoList.downloadList}; //NONSOCKET
+        socket.emit('downloadBatch', downloadBatchInfo); //NONSOCKET
         
         // Start auto download
         socket.on('downloadReady', function(message){

@@ -16,6 +16,7 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 //Socket.io
+var clientIDs = []; //NONSOCKET
 var toonDownloadList = [];
 var socket_io = require('socket.io');
 var server = http.Server(app);
@@ -117,6 +118,107 @@ app.post('/getMp4Url', function(req, res){
 //Socket.io Downloader
 io.on('connection', function(socket){
   
+  console.log('socket.id is:', socket.id); //DEBUG
+  
+  //Gen Client Id NONSOCKET
+  function genClientId(){
+    
+    //generate random hex
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    for(var i=0; i < 8; i++){
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    
+    //make sure it isn't a duplicate
+    for(var i=0; i < clientIDs.length; i++){
+        if(text === clientIDs[i]){
+            genClientId();
+        }
+    }
+    return text;
+  }
+  
+  var clientDLid = genClientId();
+  io.to(socket.id).emit('clientID', clientDLid);
+  
+  //Ready Download List //NONSOCKET
+  socket.on('downloadBatch', function(downloadBatchInfo) {
+    //toonDownloadList.push({clientId: downloadBatchInfo.client , clientList: downloadBatchInfo.list}); //OLD WORKS sorta
+    toonDownloadList.push({socketID: socket.id, clientId: downloadBatchInfo.client , clientList: downloadBatchInfo.list});
+    console.log(downloadBatchInfo); //DEBUG
+    io.to(socket.id).emit('downloadReady', 'Youre download is ready');
+  });
+  
+  //Route: Send Video Download to client
+  app.get('/downloadEpisode/:socketRef/:videoRef', function(req, res){
+  
+    var videoToDownload;
+    var socketIDcallback;
+
+    for(var i=0; i<toonDownloadList.length; i++){
+      if(toonDownloadList[i].clientId === req.params.socketRef){
+        for(var k=0; k<toonDownloadList[i].clientList.length; k++){
+          if(toonDownloadList[i].clientList[k].fileID === req.params.videoRef){
+            //console.log('socket.id is:', toonDownloadList[i].socketID); //DEBUG
+            socketIDcallback = toonDownloadList[i].socketID; //DEBUG
+            videoToDownload = (toonDownloadList[i].clientList[k].fileUrl).replace(/\\/g, '');
+            console.log('Found Video ID');
+            break;
+          }else{
+            console.log('Not Found Video ID');
+          }
+        }
+      }
+    }
+    
+    //console.log('socket.id is:', toonDownloadList[i].socketID); //DEBUG DOESN'T WORK
+    
+    //Stream Video to User
+    var videoToDownloadStr = videoToDownload.toString();
+    var retryDownload;
+
+    var options = {
+      method: 'GET',
+      uri: videoToDownloadStr
+    };
+    request(options)
+      .on('response' ,function(response){
+        console.log('TOSTRING:VideoRequest: ',videoToDownload);
+        console.log('VideoResCode: ',response.statusCode);
+        console.log('VideoResType: ',response.headers['content-type']);
+        
+        //Video Retry
+        if(response.statusCode === 520 || response.statusCode === 522){
+          retryDownload = true;
+        }else{
+          retryDownload = false;
+        }
+      })
+      .pipe(res);
+    
+    //Request Next/Retry Video  
+    req.on("end", function(){
+      if(retryDownload === false){
+        console.log('VideoReqEnd: Ended Normally');
+        console.log('Next Video on this ID:,', socketIDcallback); //DEBUG
+        //io.to(socket.id).emit('requestNext', 'Next Download'); //FIX THIS socketIDcallback
+        io.to(socketIDcallback).emit('requestNext', 'Next Download');
+        console.log('-----------------------------------------------');
+      }else if(retryDownload === true){
+        setTimeout(function(){
+          console.log('VideoReqEnd: Returned 520 or 522');
+          //io.to(socket.id).emit('requestRetry', 'Retry Download'); //FIX THIS
+          io.to(socketIDcallback).emit('requestRetry', 'Retry Download');
+          console.log('-----------------------------------------------');
+        }, 5000);
+      }
+    });
+    
+  });
+  
+  
+/* 
   //Send client their socket id
   var downloadId = socket.id;
   io.to(downloadId).emit('clientID', downloadId);
@@ -188,11 +290,11 @@ io.on('connection', function(socket){
     });
     
   });
-  
+*/ 
 });
 
 //Mocha Test Exports
 exports.app = app;
 
 server.listen(process.env.PORT || 8080); 
-console.log('ToonIs Downloader: Online: Revision: HerokuVerify_1');
+console.log('ToonIs Downloader: Online: Revision: NOSocketID');
