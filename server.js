@@ -189,7 +189,8 @@ io.on('connection', function(socket){
         }
       })
       //DEBUG
-      .on('end', function(response){
+      //.on('end', function(response){ //Works on cloud9 but doesn't totally work on heroku
+      .on('close', function(response){
         console.log('THE REQUEST HAS ENDED');
         if(retryDownload === false){
           console.log('VideoReqEnd: Ended Normally');
@@ -229,4 +230,4 @@ io.on('connection', function(socket){
 exports.app = app;
 
 server.listen(process.env.PORT || 8080); 
-console.log('ToonIs Downloader: Online: Revision: EndTry_0');
+console.log('ToonIs Downloader: Online: Revision: CloseTry_0');
