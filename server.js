@@ -189,8 +189,8 @@ io.on('connection', function(socket){
         }
       })
       //DEBUG
-      //.on('end', function(response){ //Works on cloud9 but doesn't totally work on heroku
-      .on('close', function(response){
+      .on('end', function(response){ //Works on cloud9 but doesn't totally work on heroku
+      //.on('close', function(response){ //Works on cloud9, doesn't work on Heroku at all
         console.log('THE REQUEST HAS ENDED');
         if(retryDownload === false){
           console.log('VideoReqEnd: Ended Normally');
