@@ -171,7 +171,7 @@ io.on('connection', function(socket){
     var videoToDownloadStr = videoToDownload.toString();
     var retryDownload;
 
-    var options = {
+    /*var options = {
       method: 'GET',
       uri: videoToDownloadStr
     };
@@ -191,40 +191,83 @@ io.on('connection', function(socket){
       .on('end', function(){
         console.log('DOWNLOAD STREAM IS NOW OVER');
       })
-      //DEBUG
-      /*.on('end', function(response){ //Works on cloud9 but doesn't totally work on heroku
-      //.on('close', function(response){ //Works on cloud9, doesn't work on Heroku at all
-        console.log('THE REQUEST HAS ENDED');
-        if(retryDownload === false){
-          console.log('VideoReqEnd: Ended Normally');
-          io.to(socketIDcallback).emit('requestNext', 'Next Download');
-          console.log('-----------------------------------------------');
-        }else if(retryDownload === true){
-          setTimeout(function(){
-            console.log('VideoReqEnd: Returned 520 or 522');
-            io.to(socketIDcallback).emit('requestRetry', 'Retry Download');
-            console.log('-----------------------------------------------');
-          }, 5000);
-        }
-      })*/
-      .pipe(res);
-    
-    //Request Next/Retry Video  
-    /*req.on("end", function(){
-      if(retryDownload === false){
-        console.log('REQ_End: Ended Normally');
-        console.log('Next Video on this ID:,', socketIDcallback);
-        io.to(socketIDcallback).emit('requestNext', 'Next Download');
-        console.log('-----------------------------------------------');
-      }else if(retryDownload === true){
-        setTimeout(function(){
-          console.log('REQ_End: Returned 520 or 522');
-          io.to(socketIDcallback).emit('requestRetry', 'Retry Download');
-          console.log('-----------------------------------------------');
-        }, 5000);
-      }
-    });*/
-    
+      .pipe(res);*/
+      
+      
+      ////////////////////NEW VERSION////////////////////
+      /*request({
+        method: 'HEAD',
+        uri: videoToDownloadStr 
+      },
+        function(err, headRes){
+          if(err){console.log('Error:', err)}
+          var fileSize = headRes.headers['content-length'];
+          console.log('fileSize:',fileSize);
+          
+          var size = 0;
+          
+          var streamFile = request({
+            method: 'GET',
+            uri: videoToDownloadStr 
+          });
+          
+          streamFile.on('response', function(response){
+            console.log('VideoResCode: ',response.statusCode);
+            console.log('VideoResType: ',response.headers['content-type']);
+            console.log('VideoResSize: ',response.headers['content-length']);
+          })
+          
+          streamFile.on('data', function(data){
+            size += data.length;
+            //console.log(size +"/"+ fileSize); //KEEP THIS DEBUG
+            if(size >= fileSize){
+              console.log('DOWNLOAD IS NOW COMPLETE:'+size+'/'+fileSize);
+            }
+          }).pipe(res);
+          
+          
+        } 
+      );*/
+      
+      ////////////////////2ND VERSION////////////////////
+      var fileSize;
+      var currentSize = 0;
+      var responseCode;
+      
+      var streamFile = request({
+            method: 'GET',
+            uri: videoToDownloadStr 
+      });
+      
+      streamFile.on('response', function(response){
+            fileSize = response.headers['content-length'];
+            responseCode = response.statusCode;
+            
+            //Check
+            console.log('fileSize: ', fileSize);
+            console.log('responseCode: ',responseCode);
+            
+            //if 520/522 Retry
+            if(responseCode === 520 || responseCode === 522){
+              setTimeout(function(){
+                console.log('STATUS CODE: 520 or 522');
+                io.to(socketIDcallback).emit('requestRetry', 'Retry Download');
+                console.log('------------------FAILED----------------------');
+              }, 5000);
+            }
+      });
+      
+      streamFile.on('data', function(data){
+            currentSize += data.length;
+            //console.log(currentSize +"/"+ fileSize); //KEEP THIS DEBUG
+            if(currentSize >= fileSize){
+              console.log('STATUS CODE: ', responseCode);
+              io.to(socketIDcallback).emit('requestNext', 'Next Download');
+              console.log('------------------COMPLETE------------------------');
+            }
+      }).pipe(res);
+   
+      
   });
 
 });
@@ -233,4 +276,4 @@ io.on('connection', function(socket){
 exports.app = app;
 
 server.listen(process.env.PORT || 8080); 
-console.log('ToonIs Downloader: Online: Revision: Req_Try');
+console.log('ToonIs Downloader: Online: Revision: Url');
