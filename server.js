@@ -189,7 +189,7 @@ io.on('connection', function(socket){
         }
       })
       //DEBUG
-      .on('end', function(response){ //Works on cloud9 but doesn't totally work on heroku
+      /*.on('end', function(response){ //Works on cloud9 but doesn't totally work on heroku
       //.on('close', function(response){ //Works on cloud9, doesn't work on Heroku at all
         console.log('THE REQUEST HAS ENDED');
         if(retryDownload === false){
@@ -203,24 +203,24 @@ io.on('connection', function(socket){
             console.log('-----------------------------------------------');
           }, 5000);
         }
-      })
+      })*/
       .pipe(res);
     
     //Request Next/Retry Video  
-    /*req.on("end", function(){
+    req.on("end", function(){
       if(retryDownload === false){
-        console.log('VideoReqEnd: Ended Normally');
+        console.log('REQ_End: Ended Normally');
         console.log('Next Video on this ID:,', socketIDcallback);
         io.to(socketIDcallback).emit('requestNext', 'Next Download');
         console.log('-----------------------------------------------');
       }else if(retryDownload === true){
         setTimeout(function(){
-          console.log('VideoReqEnd: Returned 520 or 522');
+          console.log('REQ_End: Returned 520 or 522');
           io.to(socketIDcallback).emit('requestRetry', 'Retry Download');
           console.log('-----------------------------------------------');
         }, 5000);
       }
-    });*/
+    });
     
   });
 
@@ -230,4 +230,4 @@ io.on('connection', function(socket){
 exports.app = app;
 
 server.listen(process.env.PORT || 8080); 
-console.log('ToonIs Downloader: Online: Revision: CloseTry_0');
+console.log('ToonIs Downloader: Online: Revision: Req_Try');
