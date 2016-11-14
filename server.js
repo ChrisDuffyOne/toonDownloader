@@ -188,6 +188,9 @@ io.on('connection', function(socket){
           retryDownload = false;
         }
       })
+      .on('end', function(){
+        console.log('DOWNLOAD STREAM IS NOW OVER');
+      })
       //DEBUG
       /*.on('end', function(response){ //Works on cloud9 but doesn't totally work on heroku
       //.on('close', function(response){ //Works on cloud9, doesn't work on Heroku at all
@@ -207,7 +210,7 @@ io.on('connection', function(socket){
       .pipe(res);
     
     //Request Next/Retry Video  
-    req.on("end", function(){
+    /*req.on("end", function(){
       if(retryDownload === false){
         console.log('REQ_End: Ended Normally');
         console.log('Next Video on this ID:,', socketIDcallback);
@@ -220,7 +223,7 @@ io.on('connection', function(socket){
           console.log('-----------------------------------------------');
         }, 5000);
       }
-    });
+    });*/
     
   });
 
